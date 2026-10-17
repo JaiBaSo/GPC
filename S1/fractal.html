@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL Gradiente en Pantalla Completa</title>
+    <style>
+        body {
+            background-color: black;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            display: block;
+            background-color: white;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="glCanvas" width="800" height="600"></canvas>
+
+    <script>
+        window.onload = function() {
+            var canvas = document.getElementById("glCanvas");
+            var gl = canvas.getContext("webgl");
+
+            if (!gl) {
+                alert("Error: Tu navegador no soporta WebGL.");
+                return;
+            }
+
+            // Vertex shader simple que solo pasa las posiciones a la pantalla
+            var vertexShaderSource = `
+                attribute vec2 a_position;
+                void main() {
+                    gl_Position = vec4(a_position, 0.0, 1.0);
+                }
+            `;
+
+            // Fragment shader que usa gl_FragCoord para crear un conjunto de Mandelbrot
+            var fragmentShaderSource = `
+			precision mediump float;
+
+			uniform vec2 u_resolution;  // Resolución de la pantalla
+			uniform float u_time;       // Tiempo transcurrido, si se quiere animar
+
+			void main() {
+				// Convertir las coordenadas de pantalla a coordenadas complejas (en el plano de Mandelbrot)
+				vec2 uv = gl_FragCoord.xy / u_resolution;
+				vec2 c = vec2(uv.x * 3.5 - 2.5, uv.y * 2.0 - 1.0);  // Escalar y trasladar a la región del fractal
+
+				vec2 z = vec2(0.0);
+				float iterations = 0.0;
+				const float max_iterations = 100.0;
+
+				// Iterar el cálculo de Mandelbrot
+				for (float i = 0.0; i < max_iterations; i++) {
+					if (length(z) > 2.0) break;
+					z = vec2(
+						z.x * z.x - z.y * z.y + c.x,
+						2.0 * z.x * z.y + c.y
+					);
+					iterations = i;
+				}
+
+				// Color basado en las iteraciones
+				float color = iterations / max_iterations;
+				//gl_FragColor = vec4(vec3(color), 1.0);
+				// Generar un espectro de colores usando sin y cos
+				float r = 0.5 + 0.5 * cos(3.0 + color * 6.28318);
+				float g = 0.5 + 0.5 * cos(1.0 + color * 6.28318);
+				float b = 0.5 + 0.5 * cos(5.0 + color * 6.28318);
+				gl_FragColor = vec4(r, g, b, 1.0);
+				
+			}
+            `;
+
+            function createShader(gl, type, source) {
+                var shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error("Error al compilar el shader:", gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                return shader;
+            }
+
+            var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+            var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+            var program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error("Error al enlazar el programa:", gl.getProgramInfoLog(program));
+                return;
+            }
+            gl.useProgram(program);
+
+            // Definir los datos del Quad que ocupa toda la pantalla
+            var positions = new Float32Array([
+                -1.0,  1.0,  // Vértice superior izquierdo
+                 1.0,  1.0,  // Vértice superior derecho
+                -1.0, -1.0,  // Vértice inferior izquierdo
+                 1.0, -1.0   // Vértice inferior derecho
+            ]);
+
+            // Crear un buffer para las posiciones
+            var positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+            var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+            gl.enableVertexAttribArray(positionAttributeLocation);
+            gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+            // Pasar la resolución al shader
+            var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+            gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+
+            // Limpiar la pantalla y dibujar el Quad
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        };
+    </script>
+</body>
+</html>

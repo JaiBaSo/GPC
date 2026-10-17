@@ -1,0 +1,147 @@
+// Variables globales que van siempre
+var renderer, scene, camera;
+var cameraControls;
+
+// 1-inicializa 
+init();
+// 2-Crea una escena
+loadScene();
+// 3-renderiza
+render();
+
+function init()
+{
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setClearColor( new THREE.Color(0xFFFFFF) );
+  document.getElementById('container').appendChild( renderer.domElement );
+
+  scene = new THREE.Scene();
+
+  var aspectRatio = window.innerWidth / window.innerHeight;
+  camera = new THREE.PerspectiveCamera( 50, aspectRatio , 0.1, 100 );
+  camera.position.set( 1, 1.5, 2 );
+
+  cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
+  cameraControls.target.set( 0, 0, 0 );
+
+  window.addEventListener('resize', updateAspectRatio );
+}
+
+function loadScene()
+{
+  // Instancia la geometría
+  var geometry = new THREE.BufferGeometry();
+
+  // Define los vértices 
+  var vertices = new Float32Array([
+      // Cara Arriba (Y=1)
+      -1, 1, -1,
+      -1, 1,  1,
+       1, 1,  1,
+
+       1, 1,  1,
+       1, 1, -1,
+      -1, 1, -1,
+
+      // Cara Abajo (Y=-1)
+      -1, -1, -1,
+       1, -1, -1,
+       1, -1,  1,
+
+       1, -1,  1,
+      -1, -1,  1,
+      -1, -1, -1,
+
+      // Cara Detrás (Z=-1)
+      -1, 1, -1,
+       1, 1, -1,
+       1, -1, -1,
+
+      -1, -1, -1,
+      -1,  1, -1,
+       1, -1, -1,
+
+      // Cara Frente (Z=1)
+      -1, 1, 1,
+      -1, -1, 1,
+       1, -1, 1,
+
+       1, -1, 1,
+       1, 1, 1,
+      -1, 1, 1,
+
+      // Cara Derecha (X=1)
+      1, 1, -1,
+      1, 1, 1,
+      1, -1, 1,
+
+      1, -1, 1,
+      1, -1, -1,
+      1, 1, -1,
+
+      // Cara Izquierda (X=-1)
+      -1, 1, -1,
+      -1, -1, -1,
+      -1, -1, 1,
+
+      -1, -1, 1,
+      -1, 1, 1,
+      -1, 1, -1
+  ]);
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+  // Array de colores por cara, repetido para cada vértice
+  var colors = new Float32Array([
+      // Cara Arriba - rojo
+      1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,
+      1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,
+      // Cara Abajo - verde
+      0.0, 1.0, 0.0,  0.0, 1.0, 0.0,  0.0, 1.0, 0.0,
+      0.0, 1.0, 0.0,  0.0, 1.0, 0.0,  0.0, 1.0, 0.0,
+      // Cara Detrás - azul
+      0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0,
+      0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0,
+      // Cara Frente - magenta
+      1.0, 0.0, 1.0,  1.0, 0.0, 1.0,  1.0, 0.0, 1.0,
+      1.0, 0.0, 1.0,  1.0, 0.0, 1.0,  1.0, 0.0, 1.0,
+      // Cara Derecha - amarillo
+      1.0, 1.0, 0.0,  1.0, 1.0, 0.0,  1.0, 1.0, 0.0,
+      1.0, 1.0, 0.0,  1.0, 1.0, 0.0,  1.0, 1.0, 0.0,
+      // Cara Izquierda - cian
+      0.0, 1.0, 1.0,  0.0, 1.0, 1.0,  0.0, 1.0, 1.0,
+      0.0, 1.0, 1.0,  0.0, 1.0, 1.0,  0.0, 1.0, 1.0
+  ]);
+
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  var material = new THREE.MeshBasicMaterial({
+      vertexColors: true
+  });
+
+  var malla = new THREE.Mesh(geometry, material);
+  scene.add(malla);
+
+  var axesHelper = new THREE.AxesHelper(0.5);
+  scene.add(axesHelper);
+}
+
+function updateAspectRatio()
+{
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+}
+
+function update()
+{
+  cameraControls.update();
+}
+
+function render()
+{
+	requestAnimationFrame( render );
+	update();
+	renderer.render( scene, camera );
+}
