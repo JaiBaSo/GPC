@@ -439,11 +439,7 @@ function setupGUI() {
            materialRotula.wireframe = valor;
        });
 
-    // 4. Animación estilo "teabag": se agacha rápido varias veces a un lado y luego al otro
-    //
-    // paso(destino, ms, veces) crea un tween que lleva "controles" hasta "destino" en "ms" milisegundos.
-    // Si veces > 0 hace yoyo: va y vuelve, repitiéndose "veces" veces más (ritmo).
-    // Truco: con veces IMPAR (1, 3, 5...) el paso termina donde empezó.
+    // 4. Animación
     function paso(destino, ms, veces) {
         var t = new TWEEN.Tween(controles)
             .to(destino, ms)
@@ -454,33 +450,22 @@ function setupGUI() {
     }
 
     controles.anima = function () {
-        TWEEN.removeAll();   // si ya había una animación en marcha, se cancela
-
-        // La sentadilla: brazo y antebrazo se doblan hacia delante y vuelven, a buen ritmo
+        TWEEN.removeAll();
         var agacharse = { giroBrazo: 45, giroAntebrazoZ: -50 };
 
         var pasos = [
-            // 1) se gira hacia un lado
             paso({ giroBase: -60 }, 700),
-            // 2) teabag: 2 sentadillas (ida y vuelta x2 = 4 recorridos = repeat 3)
             paso(agacharse, 450, 3),
-            // 3) se gira hacia el otro lado
             paso({ giroBase: 60 }, 900),
-            // 4) teabag otra vez
             paso(agacharse, 450, 3),
-            // 5) burla final: las pinzas hacen clac clac
             paso({ separacionPinza: 2 }, 150, 5),
-            // 6) vuelve a la posición inicial
             paso({ giroBase: 0, giroBrazo: 0, giroAntebrazoY: 0, giroAntebrazoZ: 0, giroPinza: 0, separacionPinza: 10 }, 800)
         ];
 
-        // Cada paso arranca cuando acaba el anterior
         for (var i = 0; i < pasos.length - 1; i++) {
             pasos[i].chain(pasos[i + 1]);
         }
         pasos[0].start();
     };
-
-    // Una función dentro del objeto → lil-gui dibuja un botón
     gui.add(controles, 'anima').name('Anima');
 }
