@@ -128,6 +128,20 @@ function crearHabitacion() {
             side: THREE.BackSide
         }));
     }
+    function crearHabitacion() {
+    var caras = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
+    var materiales = [];
+    for (var i = 0; i < 6; i++) {
+        materiales.push(new THREE.MeshBasicMaterial({
+            map: cargador.load('images/' + caras[i]),
+            side: THREE.BackSide
+        }));
+    }
+    materiales[3].visible = false;   // cara negy (suelo de la habitación): la tapa crearSuelo();
+    var habitacion = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), materiales);
+    habitacion.position.y = 499;   // casi apoyada en el suelo (ver nota)
+    scene.add(habitacion);
+}
     var habitacion = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), materiales);
     habitacion.position.y = 499;   // casi apoyada en el suelo (ver nota)
     scene.add(habitacion);
