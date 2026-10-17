@@ -136,8 +136,8 @@ function crearSuelo() {
     var geometriaSuelo = new THREE.PlaneGeometry(1000, 1000);
     geometriaSuelo.rotateX(-Math.PI / 2);
     var textura = new THREE.TextureLoader().load('images/pisometalico_1024.jpg');
-    textura.wrapS = THREE.RepeatWrapping;   // repetir en horizontal
-    textura.wrapT = THREE.RepeatWrapping;   // repetir en vertical
+    textura.wrapS = THREE.RepeatWrapping;  
+    textura.wrapT = THREE.RepeatWrapping;  
     textura.repeat.set(5, 5);
     var materialSuelo = new THREE.MeshPhongMaterial({ map: textura });
     var suelo = new THREE.Mesh(geometriaSuelo, materialSuelo);
@@ -253,12 +253,12 @@ function loadRobot() {
     geomDedo1.setAttribute('position', new THREE.BufferAttribute(vertices1, 3));
 
     // Coordenadas de textura (UV): proyección lateral
-    var uvs = new Float32Array(36 * 2);        // 2 valores (u, v) por vértice
+    var uvs = new Float32Array(36 * 2);    
     for (var i = 0; i < 36; i++) {
         var y = vertices1[3*i + 1];
         var z = vertices1[3*i + 2];
-        uvs[2*i]     = (z - 9.5) / 19;         // u
-        uvs[2*i + 1] = (y + 10) / 20;          // v
+        uvs[2*i]     = (z - 9.5) / 19;         
+        uvs[2*i + 1] = (y + 10) / 20;          
     }
     geomDedo1.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     geomDedo1.computeVertexNormals();
@@ -270,7 +270,6 @@ function loadRobot() {
     Pinza2.position.set(20, 0, 10);
     Mano.add(Pinza2);
 
-    // establecemos la jerarquía
     Brazo.add(AnteBrazo);
     Base.add(Brazo);
     robot.add(Base);
@@ -335,7 +334,7 @@ function render() {
 }
 
 function setupGUI() {
-    // 1. Los datos que controlan las barras (un objeto)
+    // 1. Los datos que controlan las barras
     var controles = {
         giroBase: 0,          
         giroBrazo: 0,         
@@ -361,7 +360,6 @@ function setupGUI() {
     }
 
     // 3. Las barras: gui.add(objeto, 'propiedad', mínimo, máximo)
-    //    .listen() hace que la barra se actualice sola cuando la animación cambia el valor
     gui.add(controles, 'giroBase', -180, 180)
        .name('Giro Base')
        .listen()
@@ -408,7 +406,6 @@ function setupGUI() {
     gui.add(controles, 'alambres')
        .name('Alambres')
        .onChange(function (valor) {
-           // ahora hay varios materiales: hay que cambiarlos todos
            materialMate.wireframe = valor;
            materialBrillante.wireframe = valor;
            materialRotula.wireframe = valor;
