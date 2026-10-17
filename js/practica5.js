@@ -5,12 +5,10 @@ var cameraTop;
 var robot = new THREE.Object3D();
 var teclas = {ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false};
 
-// Texturas: se cargan UNA sola vez y se reutilizan
 var cargador = new THREE.TextureLoader();
 var texMadera = cargador.load('images/wood512.jpg');
 var texMetal = cargador.load('images/metal_128.jpg');
 
-// Materiales: mate (Lambert) y brillante (Phong)
 var materialMate = new THREE.MeshLambertMaterial({map: texMadera});
 var materialBrillante = new THREE.MeshPhongMaterial({map: texMetal, specular: 0xffffff, shininess: 40});
 
@@ -63,7 +61,7 @@ function init() {
     // Cámara cenital para la miniatura
     cameraTop = new THREE.OrthographicCamera(-200, 200, 200, -200, 1, 5000);
     cameraTop.position.set(0, 1000, 0);
-    cameraTop.up.set(0, 0, 1);   // ANTES de lookAt: mirando hacia abajo, el up por defecto (Y) sería paralelo a la dirección de la vista
+    cameraTop.up.set(0, 0, 1);
     cameraTop.lookAt(0, 0, 0);
 
     // 4. Controles de órbita
@@ -83,10 +81,10 @@ function init() {
     // Luz direccional
     var luzDireccional = new THREE.DirectionalLight(0xffffff, 0.5);
     luzDireccional.position.set(200, 400, 200);
-    luzDireccional.castShadow = true;                    // paso 2: la luz proyecta sombra
-    luzDireccional.shadow.mapSize.width = 1024;          // tamaño del mapa de sombras
+    luzDireccional.castShadow = true;                    
+    luzDireccional.shadow.mapSize.width = 1024;         
     luzDireccional.shadow.mapSize.height = 1024;
-    luzDireccional.shadow.camera.left = -300;            // caja de la cámara de sombras
+    luzDireccional.shadow.camera.left = -300;            
     luzDireccional.shadow.camera.right = 300;
     luzDireccional.shadow.camera.top = 300;
     luzDireccional.shadow.camera.bottom = -300;
@@ -97,10 +95,10 @@ function init() {
     // Luz focal
     var luzFoco = new THREE.SpotLight(0xffffff, 1);      // color, intensidad
     luzFoco.position.set(-220, 500, 100);
-    luzFoco.target.position.set(0, 0, 0);                // hacia dónde apunta
-    luzFoco.angle = Math.PI / 6;                         // ángulo del cono (30°)
-    luzFoco.penumbra = 0.3;                              // borde suave del cono
-    luzFoco.castShadow = true;                           // paso 2
+    luzFoco.target.position.set(0, 0, 0);                
+    luzFoco.angle = Math.PI / 6;                         
+    luzFoco.penumbra = 0.3;                              
+    luzFoco.castShadow = true;                         
     luzFoco.shadow.mapSize.width = 1024;
     luzFoco.shadow.mapSize.height = 1024;
     luzFoco.shadow.camera.near = 1;
@@ -128,39 +126,20 @@ function crearHabitacion() {
             side: THREE.BackSide
         }));
     }
-    function crearHabitacion() {
-    var caras = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
-    var materiales = [];
-    for (var i = 0; i < 6; i++) {
-        materiales.push(new THREE.MeshBasicMaterial({
-            map: cargador.load('images/' + caras[i]),
-            side: THREE.BackSide
-        }));
-    }
-    materiales[3].visible = false;   // cara negy (suelo de la habitación): la tapa crearSuelo();
+    materiales[3].visible = false;   // cara negy (suelo de la habitación): la tapa crearSuelo()
     var habitacion = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), materiales);
-    habitacion.position.y = 499;   // casi apoyada en el suelo (ver nota)
-    scene.add(habitacion);
-}
-    var habitacion = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), materiales);
-    habitacion.position.y = 499;   // casi apoyada en el suelo (ver nota)
+    habitacion.position.y = 499;   // casi apoyada en el suelo
     scene.add(habitacion);
 }
 
 function crearSuelo() {
-    // Plano de 1000 x 1000 (sin divisiones extra ya que no es una rejilla)
     var geometriaSuelo = new THREE.PlaneGeometry(1000, 1000);
-
-    // Lo tumbamos al plano XZ para que quede horizontal
     geometriaSuelo.rotateX(-Math.PI / 2);
-
     var textura = new THREE.TextureLoader().load('images/pisometalico_1024.jpg');
     textura.wrapS = THREE.RepeatWrapping;   // repetir en horizontal
     textura.wrapT = THREE.RepeatWrapping;   // repetir en vertical
     textura.repeat.set(5, 5);
-
     var materialSuelo = new THREE.MeshPhongMaterial({ map: textura });
-
     var suelo = new THREE.Mesh(geometriaSuelo, materialSuelo);
     suelo.receiveShadow = true;
     scene.add(suelo);
@@ -274,7 +253,6 @@ function loadRobot() {
     geomDedo1.setAttribute('position', new THREE.BufferAttribute(vertices1, 3));
 
     // Coordenadas de textura (UV): proyección lateral
-    // z va de 9.5 a 28.5 (rango 19) e y va de -10 a 10 (rango 20); se normalizan a [0, 1]
     var uvs = new Float32Array(36 * 2);        // 2 valores (u, v) por vértice
     for (var i = 0; i < 36; i++) {
         var y = vertices1[3*i + 1];
@@ -318,7 +296,7 @@ function updateAspectRatio() {
 
 function render() {
     requestAnimationFrame(render);
-    TWEEN.update();           // hace avanzar las animaciones (tween.js)
+    TWEEN.update();        
     cameraControls.update();
 
     if (teclas['ArrowUp']) {
@@ -359,21 +337,19 @@ function render() {
 function setupGUI() {
     // 1. Los datos que controlan las barras (un objeto)
     var controles = {
-        giroBase: 0,          // grados
-        giroBrazo: 0,         // grados
-        giroAntebrazoY: 0,    // grados
-        giroAntebrazoZ: 0,    // grados
-        giroPinza: 0,         // grados
-        separacionPinza: 10,  // distancia (las pinzas empiezan en z = ±10)
-        alambres: false       // true = alámbrico, false = sólido
+        giroBase: 0,          
+        giroBrazo: 0,         
+        giroAntebrazoY: 0,   
+        giroAntebrazoZ: 0,    
+        giroPinza: 0,        
+        separacionPinza: 10,  
+        alambres: false      
     };
 
     // 2. El panel
     var gui = new lil.GUI();
     gui.title('Control Robot');
 
-    // Aplica TODOS los valores de "controles" al robot. La usa la animación:
-    // el tween cambia los números y esta función los pasa a las piezas.
     function aplicarControles() {
         Base.rotation.y = THREE.MathUtils.degToRad(controles.giroBase);
         Brazo.rotation.z = THREE.MathUtils.degToRad(controles.giroBrazo);
@@ -425,11 +401,10 @@ function setupGUI() {
        .name('Separación Pinza')
        .listen()
        .onChange(function (distancia) {
-           Pinza1.position.z = -distancia;   // una va hacia un lado...
-           Pinza2.position.z = distancia;    // ...y la otra hacia el contrario
+           Pinza1.position.z = -distancia;  
+           Pinza2.position.z = distancia;   
        });
 
-    // Casilla: sin mínimo ni máximo porque el valor inicial es un booleano
     gui.add(controles, 'alambres')
        .name('Alambres')
        .onChange(function (valor) {
